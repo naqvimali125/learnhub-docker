@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}{{ course.title }}{% endblock %}
+{% block content %}
+<div class="crumbs"><a href="{% url 'course_list' %}">Courses</a> / {{ course.title }}</div>
+<div class="split">
+  <div>
+    <div class="page-head" style="margin-bottom:12px">
+      <div>
+        <span class="badge">{% if course.category %}{{ course.category.name }}{% else %}General{% endif %}</span>
+        {% if not course.is_published %}<span class="badge warn">Draft, not visible to students</span>{% endif %}
+        <h1 style="margin-top:8px">{{ course.title }}</h1>
+        <p>{{ course.summary }}</p>
+      </div>
+    </div>
+    <div class="panel">
+      <h2>About this course</h2>
+      <div class="text">{{ course.description|linebreaks }}</div>
+      <p class="tiny">Taught by <strong>{{ course.instructor.display_name }}</strong>. {{ course.get_level_display }} level, {{ lessons|length }} lesson{{ lessons|length|pluralize }}, about {{ total_minutes }} minutes.</p>
+    </div>
+
+    <div class="panel">
+      <h2>Lessons</h2>
+      {% if lessons %}
+      <ul class="outline">
+        {% for l in lessons %}
+        <li>
+          <span class="tick {% if l.id in done_ids %}done{% endif %}" aria-hidden="true"></span>
+          <div class="grow">
+            <div class="title">
+              {% if enrollment or manager %}<a href="{% url 'lesson_view' course.slug l.id %}">{{ l.title }}</a>{% else %}{{ l.title }}{% endif %}
+            </div>
+            <div class="tiny">{{ l.duration_minutes }} min{% if l.video %} , video{% endif %}{% if l.attachment %} , handout{% endif %}</div>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}<p class="muted">Lessons are coming soon.</p>{% endif %}
+    </div>
+
+    {% if quizzes or assignments %}
+    <div class="panel">
+      <h2>Practice and assessment</h2>
+      <ul class="outline">
+        {% for q in quizzes %}
+        <li><div class="grow"><div class="title">{% if enrollment or manager %}<a href="{% url 'quiz_take' q.id %}">{{ q.title }}</a>{% else %}{{ q.title }}{% endif %}</div>
+          <div class="tiny">Quiz, {{ q.n_questions }} question{{ q.n_questions|pluralize }}, pass mark {{ q.pass_mark }}%</div></div></li>
+        {% endfor %}
+        {% for a in assignments %}
+        <li><div class="grow"><div class="title">{% if enrollment or manager %}<a href="{% url 'assignment_detail' a.id %}">{{ a.title }}</a>{% else %}{{ a.title }}{% endif %}</div>
+          <div class="tiny">Assignment, {{ a.max_points }} points{% if a.due_date %}, due {{ a.due_date|date:"j M Y" }}{% endif %}</div></div></li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+  </div>
+
+  <aside>
+    <div class="cover tall {{ course.cover_class }}">{% if course.thumbnail %}<img src="{{ course.thumbnail.url }}" alt="">{% else %}{{ course.initials }}{% endif %}</div>
+    <div class="panel" style="margin-top:16px">
+      {% if enrollment %}
+        <h3>Your progress</h3>
+        <div class="progress {% if progress == 100 %}ok{% endif %}"><span style="width:{{ progress }}%"></span></div>
+        <p class="tiny" style="margin-top:8px">{{ status.lessons_done }} of {{ status.lessons_total }} lessons, {{ status.quizzes_passed }} of {{ status.quizzes_total }} quizzes passed.</p>
+        {% if enrollment.certificate %}
+          <a class="btn accent" style="width:100%" href="{% url 'certificate_view' enrollment.certificate.code %}">View certificate</a>
+        {% else %}
+          <a class="btn" style="width:100%" href="{% url 'course_learn' course.slug %}">{% if progress %}Continue learning{% else %}Start learning{% endif %}</a>
+        {% endif %}
+        <form class="inline" method="post" action="{% url 'unenroll' course.slug %}" onsubmit="return confirm('Leave this course? Your progress will be removed.')">{% csrf_token %}
+          <button class="btn ghost small" style="width:100%;margin-top:10px" type="submit">Leave course</button></form>
+      {% elif manager %}
+        <h3>You manage this course</h3>
+        <p class="tiny">{{ n_students }} student{{ n_students|pluralize }} enrolled.</p>
+        <a class="btn" style="width:100%" href="{% url 'course_manage' course.slug %}">Manage course</a>
+        {% if lessons %}<a class="btn ghost" style="width:100%;margin-top:10px" href="{% url 'course_learn' course.slug %}">Preview lessons</a>{% endif %}
+      {% elif user.is_authenticated %}
+        <h3>Ready to start?</h3>
+        <p class="tiny">{{ n_students }} learner{{ n_students|pluralize }} already enrolled. It is free.</p>
+        <form method="post" action="{% url 'enroll' course.slug %}">{% csrf_token %}<button class="btn" style="width:100%" type="submit">Enroll now</button></form>
+      {% else %}
+        <h3>Ready to start?</h3>
+        <p class="tiny">Log in or create a free account to enroll.</p>
+        <a class="btn" style="width:100%" href="{% url 'login' %}?next={{ request.path }}">Log in to enroll</a>
+      {% endif %}
+    </div>
+  </aside>
+</div>
+{% endblock %}

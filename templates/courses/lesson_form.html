@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="narrow" style="width:min(760px,100% - 32px)">
+  <div class="crumbs"><a href="{% url 'teach_dashboard' %}">Teaching</a> / <a href="{% url 'course_manage' course.slug %}">{{ course.title }}</a> / {{ title }}</div>
+  <div class="form-card">
+    <h1>{{ title }}</h1>
+    <form method="post" enctype="multipart/form-data" onsubmit="var b=this.querySelector('button[type=submit]');b.disabled=true;b.textContent='Uploading...';">
+      {% csrf_token %}
+      {% include "partials/form_fields.html" %}
+      <p class="tiny">Videos and handouts are stored in Amazon S3 when it is enabled. Large videos can take a while to upload.</p>
+      <div class="form-actions">
+        <button class="btn" type="submit">Save lesson</button>
+        <a class="btn ghost" href="{% url 'course_manage' course.slug %}">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,14 @@
+<a class="course-card" href="{% url 'course_detail' c.slug %}">
+  <div class="cover {{ c.cover_class }}">{% if c.thumbnail %}<img src="{{ c.thumbnail.url }}" alt="">{% else %}{{ c.initials }}{% endif %}</div>
+  <div class="body">
+    <span class="badge">{% if c.category %}{{ c.category.name }}{% else %}General{% endif %}</span>
+    <h3>{{ c.title }}</h3>
+    <p class="muted" style="margin:0">{{ c.summary }}</p>
+    <div class="meta">
+      <span>{{ c.get_level_display }}</span>
+      <span>{{ c.n_lessons }} lesson{{ c.n_lessons|pluralize }}</span>
+      <span>{{ c.n_students }} learner{{ c.n_students|pluralize }}</span>
+    </div>
+    <div class="tiny">By {{ c.instructor.display_name }}</div>
+  </div>
+</a>

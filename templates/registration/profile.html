@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Your profile{% endblock %}
+{% block content %}
+<div class="narrow">
+  <div class="form-card">
+    <h1>Your profile</h1>
+    <p class="muted">Signed in as <strong>{{ user.username }}</strong> ({{ user.get_role_display }}).</p>
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      {% include "partials/form_fields.html" %}
+      <div class="form-actions"><button class="btn" type="submit">Save profile</button></div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Admin panel{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Admin panel</h1><p>Platform activity at a glance.</p></div></div>
+{% include "dashboard/_panel_nav.html" %}
+<div class="figures">
+  <div class="figure"><b>{{ totals.users }}</b><span>users</span></div>
+  <div class="figure"><b>{{ totals.published }}/{{ totals.courses }}</b><span>courses published</span></div>
+  <div class="figure"><b>{{ totals.enrollments }}</b><span>enrollments</span></div>
+  <div class="figure"><b>{{ totals.attempts }}</b><span>quiz attempts</span></div>
+  <div class="figure"><b>{{ totals.submissions }}</b><span>submissions</span></div>
+  <div class="figure"><b>{{ totals.certificates }}</b><span>certificates</span></div>
+</div>
+<div class="grid cols-2">
+  <div class="panel" style="margin:0">
+    <h2>Most popular courses</h2>
+    {% if top_courses %}
+    <div class="bars">
+      {% for c, n, pct in top_courses %}
+      <div class="bar-row"><span>{{ c.title }}</span><div class="track"><span style="width:{{ pct }}%"></span></div><strong>{{ n }}</strong></div>
+      {% endfor %}
+    </div>
+    {% else %}<p class="muted">No courses yet.</p>{% endif %}
+  </div>
+  <div class="panel" style="margin:0">
+    <h2>Users by role</h2>
+    <div class="bars">
+      {% for label, n in roles %}<div class="bar-row"><span>{{ label }}</span><div class="track"><span style="width:{% widthratio n totals.users 100 %}%"></span></div><strong>{{ n }}</strong></div>{% endfor %}
+    </div>
+    <h3 style="margin-top:24px">Newest members</h3>
+    <ul class="outline">{% for u in recent_users %}<li><div class="grow">{{ u.display_name }}</div><span class="badge plain">{{ u.get_role_display }}</span></li>{% endfor %}</ul>
+  </div>
+</div>
+{% endblock %}

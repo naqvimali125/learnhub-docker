@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}{{ assignment.title }}{% endblock %}
+{% block content %}
+<div class="crumbs"><a href="{{ course.get_absolute_url }}">{{ course.title }}</a> / Assignment</div>
+<div class="page-head"><div><h1>{{ assignment.title }}</h1>
+  <p>{{ assignment.max_points }} points{% if assignment.due_date %}, due {{ assignment.due_date|date:"j F Y" }}{% if assignment.is_overdue %} <span class="badge bad">Past due</span>{% endif %}{% endif %}</p></div>
+  {% if not user.is_student %}<a class="btn" href="{% url 'submissions_list' assignment.id %}">View submissions</a>{% endif %}
+</div>
+<div class="split">
+  <div class="panel"><h2>Instructions</h2>{{ assignment.description|linebreaks }}</div>
+  <aside>
+    {% if user.is_student %}
+    <div class="panel">
+      <h3>Your submission</h3>
+      {% if submission %}
+        <p class="tiny" style="margin-bottom:8px">Uploaded {{ submission.submitted_at|date:"j M Y, H:i" }}</p>
+        <div class="attachment"><div style="flex:1"><strong>{{ submission.file.name|cut:"submissions/" }}</strong></div>
+          <a class="btn ghost small" href="{{ submission.file.url }}" target="_blank" rel="noopener">Open</a></div>
+        {% if submission.grade is not None %}
+          <p><span class="badge ok">Graded</span></p>
+          <p style="font-family:var(--serif);font-size:2rem;margin:0">{{ submission.grade }} / {{ assignment.max_points }}</p>
+          {% if submission.feedback %}<p class="muted" style="margin-top:8px"><strong>Feedback:</strong> {{ submission.feedback }}</p>{% endif %}
+        {% else %}<p><span class="badge warn">Waiting for a grade</span></p>{% endif %}
+      {% endif %}
+      {% if form %}
+        <form method="post" enctype="multipart/form-data" style="margin-top:12px">{% csrf_token %}
+          {% include "partials/form_fields.html" %}
+          <button class="btn" type="submit">{% if submission %}Replace submission{% else %}Submit assignment{% endif %}</button>
+        </form>
+      {% elif submission %}<p class="tiny">Graded work is locked.</p>{% endif %}
+    </div>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

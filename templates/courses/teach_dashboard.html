@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Teaching{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1>Teaching</h1><p>{% if user.is_lms_admin %}All courses on the platform.{% else %}Your courses and what needs your attention.{% endif %}</p></div>
+  <a class="btn" href="{% url 'course_create' %}">New course</a>
+</div>
+<div class="figures">
+  <div class="figure"><b>{{ courses|length }}</b><span>course{{ courses|length|pluralize }}, {{ published }} published</span></div>
+  <div class="figure"><b>{{ total_students }}</b><span>student{{ total_students|pluralize }} across your courses</span></div>
+  <div class="figure"><b>{{ to_grade }}</b><span>submission{{ to_grade|pluralize }} waiting for a grade</span></div>
+</div>
+{% if courses %}
+<div class="table-wrap"><table>
+  <thead><tr><th>Course</th><th>Status</th><th>Lessons</th><th>Students</th><th></th></tr></thead>
+  <tbody>
+  {% for c in courses %}
+    <tr>
+      <td><strong><a href="{% url 'course_manage' c.slug %}">{{ c.title }}</a></strong>{% if user.is_lms_admin %}<div class="tiny">by {{ c.instructor.display_name }}</div>{% endif %}</td>
+      <td>{% if c.is_published %}<span class="badge ok">Published</span>{% else %}<span class="badge warn">Draft</span>{% endif %}</td>
+      <td>{{ c.n_lessons }}</td>
+      <td>{{ c.n_students }}</td>
+      <td><div class="row-actions">
+        <a class="btn ghost small" href="{% url 'course_students' c.slug %}">Students</a>
+        <a class="btn small" href="{% url 'course_manage' c.slug %}">Manage</a></div></td>
+    </tr>
+  {% endfor %}
+  </tbody></table></div>
+{% else %}
+  <div class="empty"><p>You have not created a course yet.</p><a class="btn" href="{% url 'course_create' %}">Create your first course</a></div>
+{% endif %}
+{% endblock %}

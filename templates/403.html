@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Not allowed{% endblock %}
+{% block content %}
+<div class="narrow empty">
+  <h1>You do not have access to this page</h1>
+  <p>Your account role does not allow this action.</p>
+  <a class="btn" href="{% url 'dashboard' %}">Go to my dashboard</a>
+</div>
+{% endblock %}

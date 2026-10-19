@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Result: {{ quiz.title }}{% endblock %}
+{% block content %}
+<div class="crumbs"><a href="{{ course.get_absolute_url }}">{{ course.title }}</a> / {{ quiz.title }} / Result</div>
+<div class="panel score" style="margin-bottom:24px">
+  <div class="big">{{ attempt.score }}%</div>
+  <div>
+    <h2 style="margin:0">{% if attempt.passed %}You passed{% else %}Not passed yet{% endif %}</h2>
+    <p class="muted" style="margin:4px 0 0">{{ attempt.correct_count }} of {{ attempt.total }} correct. Pass mark is {{ quiz.pass_mark }}%.</p>
+  </div>
+  <div class="btn-row" style="margin-left:auto">
+    {% if user.is_student %}<a class="btn" href="{% url 'quiz_take' quiz.id %}">{% if attempt.passed %}Retake{% else %}Try again{% endif %}</a>{% endif %}
+    <a class="btn ghost" href="{{ course.get_absolute_url }}">Back to course</a>
+  </div>
+</div>
+<h2>Review</h2>
+{% for r in review %}
+<div class="question">
+  <h3>{{ forloop.counter }}. {{ r.question.text }}</h3>
+  {% for c in r.choices %}
+    <div class="option {% if c.correct %}right{% elif c.picked %}wrong{% endif %}" style="cursor:default">
+      <span>{{ c.text }}</span>
+      <span class="flag">{% if c.picked and c.correct %}Your answer, correct{% elif c.picked %}Your answer{% elif c.correct %}Correct answer{% endif %}</span>
+    </div>
+  {% endfor %}
+  {% if r.skipped %}<p class="tiny">You did not answer this question.</p>{% endif %}
+</div>
+{% endfor %}
+{% endblock %}

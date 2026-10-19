@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}{{ lesson.title }}{% endblock %}
+{% block content %}
+<div class="crumbs"><a href="{% url 'course_list' %}">Courses</a> / <a href="{{ course.get_absolute_url }}">{{ course.title }}</a> / {{ lesson.title }}</div>
+<div class="lesson-layout">
+  <aside class="lesson-nav">
+    <h3>{{ course.title }}</h3>
+    <div class="progress {% if progress == 100 %}ok{% endif %}"><span style="width:{{ progress }}%"></span></div>
+    <p class="tiny" style="margin:6px 0 0">{{ progress }}% complete</p>
+    <ol>
+      {% for l in lessons %}
+      <li><a href="{% url 'lesson_view' course.slug l.id %}" {% if l.id == lesson.id %}aria-current="page"{% endif %}>
+        <span class="tick {% if l.id in done_ids %}done{% endif %}" aria-hidden="true"></span>{{ l.title }}</a></li>
+      {% endfor %}
+    </ol>
+  </aside>
+
+  <article class="lesson-body">
+    <h1>{{ lesson.title }}</h1>
+    <p class="tiny">{{ lesson.duration_minutes }} minute{{ lesson.duration_minutes|pluralize }}</p>
+    {% if lesson.video %}<video controls preload="metadata" src="{{ lesson.video.url }}">Your browser cannot play this video.</video>{% endif %}
+    {% if lesson.content %}<div class="text">{{ lesson.content|linebreaks }}</div>{% endif %}
+    {% if lesson.attachment %}
+    <div class="attachment">
+      <div class="grow" style="flex:1"><strong>Lesson handout</strong><div class="tiny">{{ lesson.attachment.name|cut:"lessons/files/" }}</div></div>
+      <a class="btn ghost small" href="{{ lesson.attachment.url }}" target="_blank" rel="noopener">Download</a>
+    </div>
+    {% endif %}
+    {% if not lesson.video and not lesson.content and not lesson.attachment %}<div class="empty">This lesson has no content yet.</div>{% endif %}
+
+    <div class="pager">
+      <div>{% if prev_lesson %}<a class="btn ghost" href="{% url 'lesson_view' course.slug prev_lesson.id %}">Previous lesson</a>{% endif %}</div>
+      <div class="btn-row">
+        {% if enrolled %}
+          {% if is_done %}
+            <span class="badge ok">Completed</span>
+            <form class="inline" method="post" action="{% url 'lesson_incomplete' course.slug lesson.id %}">{% csrf_token %}<button class="btn ghost small" type="submit">Mark as not done</button></form>
+            {% if next_lesson %}<a class="btn" href="{% url 'lesson_view' course.slug next_lesson.id %}">Next lesson</a>{% else %}<a class="btn" href="{{ course.get_absolute_url }}">Back to course</a>{% endif %}
+          {% else %}
+            <form class="inline" method="post" action="{% url 'lesson_complete' course.slug lesson.id %}">{% csrf_token %}<button class="btn" type="submit">{% if next_lesson %}Mark complete and continue{% else %}Mark complete{% endif %}</button></form>
+          {% endif %}
+        {% else %}
+          {% if next_lesson %}<a class="btn" href="{% url 'lesson_view' course.slug next_lesson.id %}">Next lesson</a>{% endif %}
+        {% endif %}
+      </div>
+    </div>
+  </article>
+</div>
+{% endblock %}

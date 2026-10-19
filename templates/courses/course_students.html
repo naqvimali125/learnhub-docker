@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Students in {{ course.title }}{% endblock %}
+{% block content %}
+<div class="crumbs"><a href="{% url 'teach_dashboard' %}">Teaching</a> / <a href="{% url 'course_manage' course.slug %}">{{ course.title }}</a> / Students</div>
+<div class="page-head"><div><h1>Students</h1><p>{{ course.title }}</p></div></div>
+<div class="figures">
+  <div class="figure"><b>{{ stats.students }}</b><span>enrolled</span></div>
+  <div class="figure"><b>{{ stats.avg_progress }}%</b><span>average progress</span></div>
+  <div class="figure"><b>{{ stats.certified }}</b><span>certificate{{ stats.certified|pluralize }} issued</span></div>
+</div>
+{% if rows %}
+<div class="table-wrap"><table>
+  <thead><tr><th>Student</th><th>Progress</th><th>Quizzes passed</th><th>Average quiz score</th><th>Assignments</th><th>Certificate</th></tr></thead>
+  <tbody>
+  {% for r in rows %}
+    <tr>
+      <td><strong>{{ r.student.display_name }}</strong><div class="tiny">{{ r.student.email }}</div></td>
+      <td><div class="progress {% if r.progress == 100 %}ok{% endif %}"><span style="width:{{ r.progress }}%"></span></div><span class="tiny">{{ r.progress }}%</span></td>
+      <td>{{ r.quizzes_passed }} of {{ stats.quiz_total }}</td>
+      <td>{% if r.avg_score is not None %}{{ r.avg_score }}%{% else %}<span class="tiny">no attempts</span>{% endif %}</td>
+      <td>{{ r.submitted }} submitted, {{ r.graded }} graded</td>
+      <td>{% if r.certified %}<span class="badge ok">Issued</span>{% else %}<span class="badge plain">Not yet</span>{% endif %}</td>
+    </tr>
+  {% endfor %}
+  </tbody></table></div>
+{% else %}<div class="empty"><p>Nobody has enrolled yet. Publish the course and share its page.</p></div>{% endif %}
+{% endblock %}

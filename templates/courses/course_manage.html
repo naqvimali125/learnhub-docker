@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Manage {{ course.title }}{% endblock %}
+{% block content %}
+<div class="crumbs"><a href="{% url 'teach_dashboard' %}">Teaching</a> / {{ course.title }}</div>
+<div class="page-head">
+  <div>
+    <h1>{{ course.title }}</h1>
+    <p>{% if course.is_published %}<span class="badge ok">Published</span>{% else %}<span class="badge warn">Draft</span> Tick "Published" in Edit details when you are ready.{% endif %}
+       {{ n_students }} student{{ n_students|pluralize }} enrolled.</p>
+  </div>
+  <div class="btn-row">
+    <a class="btn ghost" href="{{ course.get_absolute_url }}">View course page</a>
+    <a class="btn ghost" href="{% url 'course_students' course.slug %}">Students</a>
+    <a class="btn ghost" href="{% url 'course_edit' course.slug %}">Edit details</a>
+    <a class="btn danger" href="{% url 'course_delete' course.slug %}">Delete</a>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="section-head"><h2>Lessons</h2><a class="btn small" href="{% url 'lesson_create' course.slug %}">Add lesson</a></div>
+  {% if lessons %}
+  <ul class="outline">
+    {% for l in lessons %}
+    <li>
+      <div class="grow"><div class="title">{{ l.order }}. {{ l.title }}</div>
+        <div class="tiny">{{ l.duration_minutes }} min{% if l.video %}, has video{% endif %}{% if l.attachment %}, has handout{% endif %}</div></div>
+      <div class="row-actions">
+        <a class="btn ghost small" href="{% url 'lesson_edit' course.slug l.id %}">Edit</a>
+        <a class="btn danger small" href="{% url 'lesson_delete' course.slug l.id %}">Delete</a>
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}<div class="empty"><p>No lessons yet. Add a lesson with text, a video, or a handout.</p></div>{% endif %}
+</div>
+
+<div class="panel">
+  <div class="section-head"><h2>Quizzes</h2><a class="btn small" href="{% url 'quiz_create' course.slug %}">Add quiz</a></div>
+  {% if quizzes %}
+  <ul class="outline">
+    {% for q in quizzes %}
+    <li><div class="grow"><div class="title">{{ q.title }}</div><div class="tiny">{{ q.n_questions }} question{{ q.n_questions|pluralize }}, pass mark {{ q.pass_mark }}%</div></div>
+      <div class="row-actions"><a class="btn ghost small" href="{% url 'quiz_builder' q.id %}">Edit questions</a>
+      <a class="btn danger small" href="{% url 'quiz_delete' q.id %}">Delete</a></div></li>
+    {% endfor %}
+  </ul>
+  {% else %}<div class="empty"><p>Quizzes are required for the certificate. Add one to test your students.</p></div>{% endif %}
+</div>
+
+<div class="panel">
+  <div class="section-head"><h2>Assignments</h2><a class="btn small" href="{% url 'assignment_create' course.slug %}">Add assignment</a></div>
+  {% if assignments %}
+  <ul class="outline">
+    {% for a in assignments %}
+    <li><div class="grow"><div class="title">{{ a.title }}</div>
+      <div class="tiny">{{ a.max_points }} points{% if a.due_date %}, due {{ a.due_date|date:"j M Y" }}{% endif %}, {{ a.n_submissions }} submission{{ a.n_submissions|pluralize }}</div></div>
+      <div class="row-actions">
+        <a class="btn small" href="{% url 'submissions_list' a.id %}">Grade</a>
+        <a class="btn ghost small" href="{% url 'assignment_edit' a.id %}">Edit</a>
+        <a class="btn danger small" href="{% url 'assignment_delete' a.id %}">Delete</a></div></li>
+    {% endfor %}
+  </ul>
+  {% else %}<div class="empty"><p>Assignments let students upload files for you to grade.</p></div>{% endif %}
+</div>
+{% endblock %}

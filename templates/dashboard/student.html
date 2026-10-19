@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}My learning{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>My learning</h1><p>Welcome back, {{ user.first_name|default:user.username }}.</p></div>
+  <a class="btn ghost" href="{% url 'course_list' %}">Find more courses</a></div>
+<div class="figures">
+  <div class="figure"><b>{{ stats.enrolled }}</b><span>course{{ stats.enrolled|pluralize }} enrolled</span></div>
+  <div class="figure"><b>{{ stats.lessons_done }}</b><span>lessons completed</span></div>
+  <div class="figure"><b>{% if stats.avg_quiz is not None %}{{ stats.avg_quiz }}%{% else %}n/a{% endif %}</b><span>average quiz score</span></div>
+  <div class="figure"><b>{{ stats.completed }}</b><span>certificate{{ stats.completed|pluralize }} earned</span></div>
+</div>
+
+<div class="split">
+  <div>
+    <h2>Your courses</h2>
+    {% if cards %}
+      <div class="grid">
+      {% for c in cards %}
+        <div class="panel" style="margin:0">
+          <div class="section-head">
+            <h3><a href="{{ c.course.get_absolute_url }}">{{ c.course.title }}</a></h3>
+            {% if c.certificate %}<a class="btn accent small" href="{% url 'certificate_view' c.certificate.code %}">Certificate</a>
+            {% else %}<a class="btn small" href="{% url 'course_learn' c.course.slug %}">{% if c.progress %}Continue{% else %}Start{% endif %}</a>{% endif %}
+          </div>
+          <div class="progress {% if c.progress == 100 %}ok{% endif %}"><span style="width:{{ c.progress }}%"></span></div>
+          <p class="tiny" style="margin:8px 0 0">{{ c.progress }}% done. Lessons {{ c.status.lessons_done }}/{{ c.status.lessons_total }}, quizzes passed {{ c.status.quizzes_passed }}/{{ c.status.quizzes_total }}.</p>
+        </div>
+      {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty"><p>You have not enrolled in a course yet.</p><a class="btn" href="{% url 'course_list' %}">Browse courses</a></div>
+    {% endif %}
+  </div>
+
+  <aside>
+    <div class="panel">
+      <h3>Assignments to do</h3>
+      {% if pending %}<ul class="outline">{% for a in pending %}
+        <li><div class="grow"><a href="{% url 'assignment_detail' a.id %}">{{ a.title }}</a><div class="tiny">{{ a.course.title }}{% if a.due_date %}, due {{ a.due_date|date:"j M" }}{% endif %}</div></div>
+        {% if a.is_overdue %}<span class="badge bad">Overdue</span>{% endif %}</li>{% endfor %}</ul>
+      {% else %}<p class="muted">Nothing waiting for you.</p>{% endif %}
+    </div>
+    <div class="panel">
+      <h3>Recent grades</h3>
+      {% if graded %}<ul class="outline">{% for s in graded %}
+        <li><div class="grow"><a href="{% url 'assignment_detail' s.assignment.id %}">{{ s.assignment.title }}</a><div class="tiny">{{ s.assignment.course.title }}</div></div><strong>{{ s.grade }}/{{ s.assignment.max_points }}</strong></li>{% endfor %}</ul>
+      {% else %}<p class="muted">Graded assignments will show here.</p>{% endif %}
+    </div>
+    <div class="panel">
+      <h3>Recent quizzes</h3>
+      {% if attempts %}<ul class="outline">{% for a in attempts %}
+        <li><div class="grow"><a href="{% url 'quiz_result' a.id %}">{{ a.quiz.title }}</a><div class="tiny">{{ a.quiz.course.title }}</div></div>
+        <span class="badge {% if a.passed %}ok{% else %}bad{% endif %}">{{ a.score }}%</span></li>{% endfor %}</ul>
+      {% else %}<p class="muted">Take a quiz from any course you are enrolled in.</p>{% endif %}
+    </div>
+  </aside>
+</div>
+{% endblock %}

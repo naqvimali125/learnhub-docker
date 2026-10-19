@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Page not found{% endblock %}
+{% block content %}
+<div class="narrow empty">
+  <h1>We could not find that page</h1>
+  <p>The link may be old, or the course may no longer be published.</p>
+  <a class="btn" href="{% url 'course_list' %}">Browse courses</a>
+</div>
+{% endblock %}

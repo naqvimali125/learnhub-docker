@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}All courses{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>All courses</h1><p>Publish or hide any course on the platform.</p></div></div>
+{% include "dashboard/_panel_nav.html" %}
+<div class="table-wrap"><table>
+  <thead><tr><th>Course</th><th>Instructor</th><th>Students</th><th>Status</th><th></th></tr></thead>
+  <tbody>
+  {% for c in courses %}
+  <tr>
+    <td><a href="{% url 'course_detail' c.slug %}"><strong>{{ c.title }}</strong></a></td>
+    <td>{{ c.instructor.display_name }}</td><td>{{ c.n }}</td>
+    <td>{% if c.is_published %}<span class="badge ok">Published</span>{% else %}<span class="badge warn">Hidden</span>{% endif %}</td>
+    <td><div class="row-actions"><form method="post" action="{% url 'panel_course_toggle' c.id %}" class="inline">{% csrf_token %}
+      <button class="btn ghost small" type="submit">{% if c.is_published %}Hide{% else %}Publish{% endif %}</button></form>
+      <a class="btn ghost small" href="{% url 'course_manage' c.slug %}">Manage</a></div></td>
+  </tr>
+  {% empty %}<tr><td colspan="5" class="muted">No courses yet.</td></tr>{% endfor %}
+  </tbody></table></div>
+{% endblock %}

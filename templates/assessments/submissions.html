@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Submissions{% endblock %}
+{% block content %}
+<div class="crumbs"><a href="{% url 'course_manage' course.slug %}">{{ course.title }}</a> / {{ assignment.title }}</div>
+<div class="page-head"><div><h1>Submissions</h1><p>{{ assignment.title }}, {{ assignment.max_points }} points. {{ waiting }} waiting for a grade.</p></div></div>
+{% if rows %}
+{% for r in rows %}
+<div class="panel">
+  <div class="section-head">
+    <div><h3>{{ r.submission.student.display_name }}</h3><span class="tiny">Uploaded {{ r.submission.submitted_at|date:"j M Y, H:i" }}</span></div>
+    <div class="btn-row">
+      {% if r.submission.grade is not None %}<span class="badge ok">Graded {{ r.submission.grade }}/{{ assignment.max_points }}</span>{% else %}<span class="badge warn">Needs grade</span>{% endif %}
+      <a class="btn ghost small" href="{{ r.submission.file.url }}" target="_blank" rel="noopener">Open file</a>
+    </div>
+  </div>
+  {% if r.submission.note %}<p class="muted"><strong>Student note:</strong> {{ r.submission.note }}</p>{% endif %}
+  <form method="post" action="{% url 'submission_grade' r.submission.id %}" class="grid cols-2" style="align-items:end">{% csrf_token %}
+    {% include "partials/form_fields.html" with form=r.form %}
+    <div><button class="btn" type="submit">Save grade</button></div>
+  </form>
+</div>
+{% endfor %}
+{% else %}<div class="empty"><p>No submissions yet.</p></div>{% endif %}
+{% endblock %}

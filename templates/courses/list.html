@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Courses{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Courses</h1><p>{{ courses|length }} course{{ courses|length|pluralize }} to choose from.</p></div></div>
+<form class="filters" method="get" role="search">
+  <input type="search" name="q" value="{{ q }}" placeholder="Search by title or topic" aria-label="Search">
+  <select name="category" aria-label="Category">
+    <option value="">All categories</option>
+    {% for cat in categories %}<option value="{{ cat.slug }}" {% if cat.slug == selected_category %}selected{% endif %}>{{ cat.name }}</option>{% endfor %}
+  </select>
+  <select name="level" aria-label="Level">
+    <option value="">All levels</option>
+    {% for value, label in levels %}<option value="{{ value }}" {% if value == selected_level %}selected{% endif %}>{{ label }}</option>{% endfor %}
+  </select>
+  <button class="btn" type="submit">Apply</button>
+  {% if q or selected_category or selected_level %}<a class="btn ghost" href="{% url 'course_list' %}">Clear</a>{% endif %}
+</form>
+{% if courses %}
+  <div class="grid cols-3">{% for c in courses %}{% include "partials/course_card.html" %}{% endfor %}</div>
+{% else %}
+  <div class="empty"><p>No courses match those filters.</p><a class="btn ghost" href="{% url 'course_list' %}">Show all courses</a></div>
+{% endif %}
+{% endblock %}

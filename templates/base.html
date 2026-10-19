@@ -1,0 +1,60 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Lumen{% endblock %} | Lumen Learning</title>
+  <link rel="stylesheet" href="{% static 'css/lumen.css' %}">
+</head>
+<body>
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="topbar">
+    <div class="container">
+      <a class="brand" href="{% url 'home' %}">Lumen</a>
+      <nav class="nav" aria-label="Main">
+        {% with current=request.resolver_match.url_name %}
+        <a href="{% url 'course_list' %}" {% if current == 'course_list' %}aria-current="page"{% endif %}>Courses</a>
+        {% if user.is_authenticated %}
+          {% if user.is_student %}<a href="{% url 'student_dashboard' %}" {% if current == 'student_dashboard' %}aria-current="page"{% endif %}>My learning</a>{% endif %}
+          {% if user.can_teach %}<a href="{% url 'teach_dashboard' %}" {% if current == 'teach_dashboard' %}aria-current="page"{% endif %}>Teaching</a>{% endif %}
+          {% if user.is_lms_admin %}<a href="{% url 'panel' %}" {% if current == 'panel' %}aria-current="page"{% endif %}>Admin panel</a>{% endif %}
+        {% endif %}
+        {% endwith %}
+      </nav>
+      <div class="userbox">
+        {% if user.is_authenticated %}
+          <a href="{% url 'profile' %}" style="display:flex;align-items:center;gap:8px;color:#fff;text-decoration:none">
+            {% if user.avatar %}<img class="avatar" src="{{ user.avatar.url }}" alt="">{% else %}<span class="avatar">{{ user.initials }}</span>{% endif %}
+            {{ user.display_name }}
+          </a>
+          <span class="role-tag">{{ user.get_role_display }}</span>
+          <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="btn light small" type="submit">Log out</button></form>
+        {% else %}
+          <a class="btn light small" href="{% url 'login' %}">Log in</a>
+          <a class="btn accent small" href="{% url 'register' %}">Create account</a>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+
+  {% block hero %}{% endblock %}
+
+  <main id="content">
+    <div class="container">
+      {% if messages %}
+      <ul class="messages" role="status">
+        {% for message in messages %}<li class="message {{ message.tags }}">{{ message }}</li>{% endfor %}
+      </ul>
+      {% endif %}
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <span>Lumen Learning, a course project.</span>
+      <span>Built with Django. Deployable on EC2 and Elastic Beanstalk.</span>
+    </div>
+  </footer>
+</body>
+</html>

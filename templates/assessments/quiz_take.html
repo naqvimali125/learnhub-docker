@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}{{ quiz.title }}{% endblock %}
+{% block content %}
+<div class="crumbs"><a href="{{ course.get_absolute_url }}">{{ course.title }}</a> / Quiz</div>
+<div class="page-head">
+  <div><h1>{{ quiz.title }}</h1>
+  <p>{{ questions|length }} question{{ questions|length|pluralize }}. You need {{ quiz.pass_mark }}% to pass.{% if quiz.description %} {{ quiz.description }}{% endif %}</p></div>
+  {% if best is not None %}<div class="badge {% if best >= quiz.pass_mark %}ok{% else %}warn{% endif %}">Best score {{ best }}%</div>{% endif %}
+</div>
+{% if not user.is_student %}<div class="message warning">Preview mode. Instructor attempts are not recorded.</div>{% endif %}
+<div class="split">
+  <form method="post">{% csrf_token %}
+    {% for q in questions %}
+    <fieldset class="question" style="margin-inline:0;min-width:0">
+      <legend style="padding:0"><h3>{{ forloop.counter }}. {{ q.text }}</h3></legend>
+      {% for c in q.choices.all %}
+      <label class="option"><input type="radio" name="q_{{ q.id }}" value="{{ c.id }}" {% if user.is_student %}required{% endif %}> <span>{{ c.text }}</span></label>
+      {% endfor %}
+    </fieldset>
+    {% endfor %}
+    {% if user.is_student %}<button class="btn" type="submit">Submit answers</button>{% endif %}
+  </form>
+  <aside class="panel">
+    <h3>Your attempts</h3>
+    {% if attempts %}
+    <ul class="outline">
+      {% for a in attempts %}<li><div class="grow"><a href="{% url 'quiz_result' a.id %}">{{ a.score }}%</a> <span class="tiny">{{ a.submitted_at|date:"j M, H:i" }}</span></div>
+      {% if a.passed %}<span class="badge ok">Passed</span>{% else %}<span class="badge bad">Not passed</span>{% endif %}</li>{% endfor %}
+    </ul>
+    {% else %}<p class="muted">No attempts yet. You can retake the quiz as many times as you like.</p>{% endif %}
+  </aside>
+</div>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}{{ quiz.title }}{% endblock %}
+{% block content %}
+<div class="crumbs"><a href="{% url 'course_manage' course.slug %}">{{ course.title }}</a> / Quiz</div>
+<div class="page-head">
+  <div><h1>{{ quiz.title }}</h1>
+  <p>Pass mark {{ quiz.pass_mark }}%. {{ attempt_count }} attempt{{ attempt_count|pluralize }}{% if avg_score is not None %}, average score {{ avg_score }}%{% endif %}.</p></div>
+  <div class="btn-row"><a class="btn ghost" href="{% url 'quiz_take' quiz.id %}">Preview quiz</a>
+  <a class="btn" href="{% url 'course_manage' course.slug %}">Done</a></div>
+</div>
+<div class="split">
+  <div>
+    {% for q in questions %}
+    <div class="question">
+      <div class="section-head"><h3>{{ forloop.counter }}. {{ q.text }}</h3>
+        <form class="inline" method="post" action="{% url 'question_delete' quiz.id q.id %}" onsubmit="return confirm('Delete this question?')">{% csrf_token %}
+          <button class="btn danger small" type="submit">Delete</button></form></div>
+      {% for c in q.choices.all %}
+        <div class="option {% if c.is_correct %}right{% endif %}" style="cursor:default"><span>{{ c.text }}</span>{% if c.is_correct %}<span class="flag" style="color:var(--ok)">Correct</span>{% endif %}</div>
+      {% endfor %}
+    </div>
+    {% empty %}
+    <div class="empty"><p>No questions yet. Use the form to add the first one.</p></div>
+    {% endfor %}
+  </div>
+  <aside class="panel">
+    <h3>Add a question</h3>
+    <form method="post">{% csrf_token %}
+      {% include "partials/form_fields.html" %}
+      <button class="btn" type="submit">Add question</button>
+    </form>
+  </aside>
+</div>
+{% endblock %}

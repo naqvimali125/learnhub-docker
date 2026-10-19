@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Learn and get certified{% endblock %}
+{% block hero %}
+<section class="hero">
+  <div class="container">
+    <div>
+      <h1>Pick a course. Finish it. Get the certificate.</h1>
+      <p>Short video and text lessons, quizzes that show you what you missed, and assignments graded by real instructors.</p>
+      <form class="search" action="{% url 'course_list' %}" method="get" role="search">
+        <input type="search" name="q" placeholder="Search {{ stats.courses }} course{{ stats.courses|pluralize }}" aria-label="Search courses">
+        <button class="btn accent" type="submit">Search</button>
+      </form>
+    </div>
+    <div class="ledger" aria-label="Sample progress">
+      <h3>What a learner sees</h3>
+      <div class="ledger-row"><span>Python for Beginners</span><strong>80%</strong><div class="progress"><span style="width:80%"></span></div></div>
+      <div class="ledger-row"><span>Database Design with SQL</span><strong>45%</strong><div class="progress"><span style="width:45%"></span></div></div>
+      <div class="ledger-row"><span>Cloud Basics on AWS</span><strong>Certified</strong><div class="progress ok"><span style="width:100%"></span></div></div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+{% block content %}
+<div class="section-head"><h2>Popular courses</h2><a href="{% url 'course_list' %}">See all courses</a></div>
+{% if featured %}
+  <div class="grid cols-3">{% for c in featured %}{% include "partials/course_card.html" %}{% endfor %}</div>
+{% else %}
+  <div class="empty"><p>No courses are published yet.</p>
+    {% if user.can_teach %}<a class="btn" href="{% url 'course_create' %}">Create the first course</a>{% endif %}</div>
+{% endif %}
+
+<div class="figures" style="margin-top:40px">
+  <div class="figure"><b>{{ stats.courses }}</b><span>published courses</span></div>
+  <div class="figure"><b>{{ stats.lessons }}</b><span>lessons to work through</span></div>
+  <div class="figure"><b>{{ stats.learners }}</b><span>learners enrolled on the platform</span></div>
+</div>
+
+<h2>How it works</h2>
+<ol class="steps">
+  <li><h3>Enroll</h3><p class="muted">Create a free student account and enroll in any published course.</p></li>
+  <li><h3>Learn and practise</h3><p class="muted">Watch lessons, download the notes, take quizzes and upload assignments.</p></li>
+  <li><h3>Get certified</h3><p class="muted">Finish every lesson and pass every quiz to receive a certificate with a public verification code.</p></li>
+</ol>
+{% endblock %}
