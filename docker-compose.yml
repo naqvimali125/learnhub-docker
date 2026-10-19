@@ -1,0 +1,44 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: learnhub_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-learnhub}
+      POSTGRES_USER: ${DB_USER:-learnhub}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-LearnHub_Pass_123}
+    volumes:
+      - learnhub_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-learnhub} -d ${DB_NAME:-learnhub}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  web:
+    image: naqviali125/learnhub:1.0
+    container_name: learnhub_web
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "80:8000"
+    environment:
+      SECRET_KEY: ${SECRET_KEY:-change-me}
+      DEBUG: "False"
+      ALLOWED_HOSTS: "*"
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_NAME: ${DB_NAME:-learnhub}
+      DB_USER: ${DB_USER:-learnhub}
+      DB_PASSWORD: ${DB_PASSWORD:-LearnHub_Pass_123}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-Admin@12345}
+      SEED_DEMO: ${SEED_DEMO:-True}
+    volumes:
+      - learnhub_media:/app/media
+
+volumes:
+  learnhub_pgdata:
+  learnhub_media:

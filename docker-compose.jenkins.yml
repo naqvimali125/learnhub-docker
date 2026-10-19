@@ -1,0 +1,49 @@
+services:
+  ci_db:
+    image: postgres:16-alpine
+    container_name: learnhub_ci_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-learnhub}
+      POSTGRES_USER: ${DB_USER:-learnhub}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-LearnHub_Pass_123}
+    volumes:
+      - learnhub_ci_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-learnhub} -d ${DB_NAME:-learnhub}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  ci_web:
+    image: python:3.12-slim
+    container_name: learnhub_ci_web
+    restart: unless-stopped
+    working_dir: /app
+    depends_on:
+      ci_db:
+        condition: service_healthy
+    ports:
+      - "8081:8000"
+    environment:
+      PYTHONDONTWRITEBYTECODE: "1"
+      COLLECTSTATIC: "0"
+      SECRET_KEY: ${SECRET_KEY:-change-me}
+      DEBUG: "False"
+      ALLOWED_HOSTS: "*"
+      DB_HOST: ci_db
+      DB_PORT: "5432"
+      DB_NAME: ${DB_NAME:-learnhub}
+      DB_USER: ${DB_USER:-learnhub}
+      DB_PASSWORD: ${DB_PASSWORD:-LearnHub_Pass_123}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-Admin@12345}
+      SEED_DEMO: ${SEED_DEMO:-True}
+    volumes:
+      - ./:/app
+      - learnhub_ci_media:/app/media
+    command: sh -c "pip install --no-cache-dir -r requirements.txt && sh docker/entrypoint.sh"
+
+volumes:
+  learnhub_ci_pgdata:
+  learnhub_ci_media:
