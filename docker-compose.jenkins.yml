@@ -7,6 +7,8 @@ services:
       POSTGRES_DB: ${DB_NAME:-learnhub}
       POSTGRES_USER: ${DB_USER:-learnhub}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-LearnHub_Pass_123}
+    ports:
+      - "5434:5432"
     volumes:
       - learnhub_ci_pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -16,17 +18,15 @@ services:
       retries: 20
 
   ci_web:
-    image: python:3.12-slim
+    image: naqviali125/learnhub:1.0
     container_name: learnhub_ci_web
     restart: unless-stopped
-    working_dir: /app
     depends_on:
       ci_db:
         condition: service_healthy
     ports:
       - "8081:8000"
     environment:
-      PYTHONDONTWRITEBYTECODE: "1"
       COLLECTSTATIC: "0"
       SECRET_KEY: ${SECRET_KEY:-change-me}
       DEBUG: "False"
@@ -42,7 +42,6 @@ services:
     volumes:
       - ./:/app
       - learnhub_ci_media:/app/media
-    command: sh -c "pip install --no-cache-dir -r requirements.txt && sh docker/entrypoint.sh"
 
 volumes:
   learnhub_ci_pgdata:
